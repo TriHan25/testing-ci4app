@@ -10,9 +10,9 @@ class Pages extends BaseController
             'title' => 'Home | Codeignier 4',
             'test' => ['satu', 'dua', 'tiga']
         ];
-        echo view('layout/header', $data);
-        echo view('pages/home');
-        echo view('layout/footer');
+        // echo view('layout/header', $data);
+        return view('pages/home', $data);
+        // echo view('layout/footer');
     }
 
     public function about()
@@ -20,8 +20,28 @@ class Pages extends BaseController
         $data = [
             'title' => 'About Me | Codeignier 4'
         ];
-        echo view('layout/header', $data);
-        echo view('pages/about');
-        echo view('layout/footer');
+        // echo view('layout/header', $data);
+        return view('pages/about', $data);
+        // echo view('layout/footer');
+    }
+
+    public function contact()
+    {
+        $data = [
+            'title' => 'Contact | Codeignier 4',
+            'alamat' => [
+                [
+                    'tipe' => 'rumah',
+                    'alamat' => 'jl.karet no 11',
+                    'kota' => 'depok',
+                ],
+                [
+                    'tipe' => 'kantor',
+                    'alamat' => 'jl.sudirman no 22',
+                    'kota' => 'jakarta',
+                ]
+            ]
+        ];
+        return view('pages/contact', $data);
     }
 }
