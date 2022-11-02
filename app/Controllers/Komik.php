@@ -44,6 +44,43 @@ class Komik extends BaseController
             'komik' => $this->komikModel->getKomik($slug)
         ];
 
+        //jika komik tidak ada
+        if (empty($data['komik'])) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Judul komik ' . $slug . ' tidak ditemukan');
+        }
+
         return view('komik/detail', $data);
+    }
+
+    public function create()
+    {
+        $data = [
+            'title' => 'Form Tambah Komik'
+        ];
+
+        return view('komik/create', $data);
+    }
+
+    public  function save()
+    {
+        // ngambil satu-satu
+        // dd($this->request->getVar('judul'));
+
+        // ngambil semua
+        // dd($this->request->getVar());
+
+        $slug = url_title($this->request->getVar('judul'), '-', true);
+
+        $this->komikModel->save([
+            'judul' => $this->request->getVar('judul'),
+            'slug' => $slug,
+            'penulis' => $this->request->getVar('penulis'),
+            'penerbit' => $this->request->getVar('penerbit'),
+            'sampul' => $this->request->getVar('sampul')
+        ]);
+
+        session()->setFlashdata('pesan', 'Data Berhasil Ditambahkan.');
+
+        return redirect()->to('/komik');
     }
 }
