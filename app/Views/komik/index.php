@@ -11,6 +11,11 @@
                     <?= session()->getFlashdata('pesan'); ?>
                 </div>
             <?php endif; ?>
+            <?php if (session()->getFlashdata('delete')) : ?>
+                <div class="alert alert-danger" role="alert">
+                    <?= session()->getFlashdata('delete'); ?>
+                </div>
+            <?php endif; ?>
             <table class="table table-hover">
                 <thead>
                     <tr>
