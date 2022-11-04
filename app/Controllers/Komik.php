@@ -93,16 +93,34 @@ class Komik extends BaseController
                 ]
             ],
             'sampul' => [
-                'rules' => 'required',
+                'rules' => 'max_size[sampul,2048]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
                 'errors' => [
-                    'required' => '{field} komik harus diisi'
+                    'max_size' => 'Ukuran gambar terlalu besar',
+                    'is_image' => 'File yang anda pilih bukan gambar',
+                    'mime_in' => 'File yang anda pilih bukan gambar'
                 ]
             ]
         ])) {
-            $validation = \Config\Services::validation();
+            // $validation = \Config\Services::validation();
             // session()->setFlashdata('not_validate', 'Judul harus unik dan field tidak boleh kosong');
-            return redirect()->to('/komik/create')->withInput()->with('validation', $validation);
+            // return redirect()->to('/komik/create')->withInput()->with('validation', $validation);
+            return redirect()->to('/komik/create')->withInput();
         }
+
+        // ambil gambar
+        $fileSampul = $this->request->getFile('sampul');
+        // apakah ada gambar yabg diupload
+        if ($fileSampul->getError() == 4) {
+            $namaSampul = 'default.png';
+        } else {
+            // generete nama sampul
+            $namaSampul = $fileSampul->getRandomName();
+            // pindah file ke folder img
+            $fileSampul->move('img', $namaSampul);
+            // ambil nama file
+            // $namaSampul = $fileSampul->getName();
+        }
+
 
         $slug = url_title($this->request->getVar('judul'), '-', true);
 
@@ -111,7 +129,7 @@ class Komik extends BaseController
             'slug' => $slug,
             'penulis' => $this->request->getVar('penulis'),
             'penerbit' => $this->request->getVar('penerbit'),
-            'sampul' => $this->request->getVar('sampul')
+            'sampul' => $namaSampul
         ]);
 
         session()->setFlashdata('pesan', 'Data Berhasil Ditambahkan.');
@@ -121,6 +139,14 @@ class Komik extends BaseController
 
     public function delete($id)
     {
+        // cari gambar berdaasar id
+        $namaKomik = $this->komikModel->find($id);
+        // cek gambar default
+        if ($namaKomik['sampul'] != 'default.png') {
+            // hapus gambar
+            unlink('img/' . $namaKomik['sampul']);
+        }
+
         $this->komikModel->delete($id);
         session()->setFlashdata('delete', 'data berhasil dihapus');
         return redirect()->to('/komik');
@@ -168,16 +194,35 @@ class Komik extends BaseController
                 ]
             ],
             'sampul' => [
-                'rules' => 'required',
+                'rules' => 'max_size[sampul,2048]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
                 'errors' => [
-                    'required' => '{field} komik harus diisi'
+                    'max_size' => 'Ukuran gambar terlalu besar',
+                    'is_image' => 'File yang anda pilih bukan gambar',
+                    'mime_in' => 'File yang anda pilih bukan gambar'
                 ]
             ]
         ])) {
-            $validation = \Config\Services::validation();
+            // $validation = \Config\Services::validation();
             // session()->setFlashdata('not_validate', 'Judul harus unik dan field tidak boleh kosong');
-            return redirect()->to('/komik/edit/' . $this->request->getVar('slug'))->withInput()->with('validation', $validation);
+            // return redirect()->to('/komik/edit/' . $this->request->getVar('slug'))->withInput()->with('validation', $validation);
+            return redirect()->to('/komik/edit/' . $this->request->getVar('slug'))->withInput();
         }
+
+        $fileSampul = $this->request->getFile('sampul');
+
+        // cek gambar, apakah gambar lama
+        if ($fileSampul->getError() == 4) {
+            $namaSampul = $this->request->getVar('sampulLama');
+        } else {
+            // generate nama random
+            $namaSampul = $fileSampul->getRandomName();
+            // pindah file
+            $fileSampul->move('img', $namaSampul);
+            // hapus file lama
+            unlink('img/' . $this->request->getVar('sampulLama'));
+        }
+
+
 
         $slug = url_title($this->request->getVar('judul'), '-', true);
 
@@ -187,7 +232,7 @@ class Komik extends BaseController
             'slug' => $slug,
             'penulis' => $this->request->getVar('penulis'),
             'penerbit' => $this->request->getVar('penerbit'),
-            'sampul' => $this->request->getVar('sampul')
+            'sampul' => $namaSampul
         ]);
 
         session()->setFlashdata('pesan', 'Data Berhasil Diubah.');
